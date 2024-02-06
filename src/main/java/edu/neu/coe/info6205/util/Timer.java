@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import edu.neu.coe.info6205.graphs.BFS_and_prims.StdRandom;
 
 /**
  * Class which is able to time the running of functions.
@@ -43,7 +44,7 @@ public class Timer {
      * @return the average milliseconds per repetition.
      */
     public <T, U> double repeat(int n, Supplier<T> supplier, Function<T, U> function) {
-        return repeat(n, false, supplier, function, null, null);
+        return repeat(n, supplier, function, null, null);
     }
 
     /**
@@ -59,8 +60,31 @@ public class Timer {
      * @param <U> the type which is the result of function and the input to postFunction (if any).
      * @return the average milliseconds per repetition.
      */
-    public <T, U> double repeat(int n, boolean warmup, Supplier<T> supplier, Function<T, U> function, UnaryOperator<T> preFunction, Consumer<U> postFunction) {
+    public <T, U> double repeat(int n, Supplier<T> supplier, Function<T, U> function, UnaryOperator<T> preFunction, Consumer<U> postFunction) {
         // TO BE IMPLEMENTED : note that the timer is running when this method is called and should still be running when it returns.
+        T t;
+        for (int i = 0; i < n; i++) {
+            pause();
+            StdRandom.uniform(100);
+            t = supplier.get();
+            if (preFunction != null) {
+                t = preFunction.apply(supplier.get());
+            }
+            resume();
+            U u = function.apply(t);
+            pause();
+            if (postFunction != null) {
+                postFunction.accept(u);
+            }
+            resume();
+            lap();
+        }
+        pause();
+        final double result = meanLapTime();
+        resume();
+        return result;
+        // END
+
 
 
 
@@ -87,7 +111,7 @@ public class Timer {
 
 
         // SKELETON
-         return 0;
+         //return 0;
         // END SOLUTION
     }
 
@@ -216,7 +240,8 @@ public class Timer {
         // TO BE IMPLEMENTED 
 
         // SKELETON
-         return 0;
+       //  return 0;
+        return System.nanoTime();
         // END SOLUTION
     }
 
@@ -231,7 +256,9 @@ public class Timer {
         // TO BE IMPLEMENTED 
 
         // SKELETON
-         return 0;
+        // return 0;
+        return ticks / 1000000.0;
+        //return System.currentTimeMillis();
         // END SOLUTION
     }
 
