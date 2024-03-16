@@ -97,6 +97,9 @@ public class MergeSortBasic<X extends Comparable<X>> extends SortWithHelper<X> {
             } else helper.copy(aux, i++, a, k);
     }
 
+    public static final String MERGESORT = "mergesort";
+    public static final String NOCOPY = "nocopy";
+    public static final String INSURANCE = "insurance";
 
     private X[] aux = null;
     private final InsertionSort<X> insertionSort;

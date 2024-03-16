@@ -65,23 +65,27 @@ public class MergeSort<X extends Comparable<X>> extends SortWithHelper<X> {
         }
 
         // TO BE IMPLEMENTED  : implement merge sort with insurance and no-copy optimizations
+        int middle = from + (to-from)/2;
+        if(noCopy){
+            sort(aux, a, from, middle);
+            sort(aux, a, middle, to);
+            if(insurance && helper.less(aux[middle-1],aux[middle])){
+                for(int k= from; k<to; k++){
+                    helper.copy(aux, k, a, k);
+                }
+                return;
+            }
+            merge(aux, a, from, middle, to);
+        }else{
+            sort(a, aux, from, middle);
+            sort(a, aux, middle, to);
+            if(insurance && helper.less(a[middle-1], a[middle])){
+                return;
+            }
+            merge(a, aux, from, middle, to, false);
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-throw new RuntimeException("implementation missing");
+//throw new RuntimeException("implementation missing");
     }
 
     // CONSIDER combine with MergeSortBasic perhaps.
@@ -90,12 +94,56 @@ throw new RuntimeException("implementation missing");
         int i = from;
         int j = mid;
         for (int k = from; k < to; k++)
-            if (i >= mid) helper.copy(sorted, j++, result, k);
-            else if (j >= to) helper.copy(sorted, i++, result, k);
+            if (i >= mid)
+                helper.copy(sorted, j++, result, k);
+            else if (j >= to)
+                helper.copy(sorted, i++, result, k);
             else if (helper.less(sorted[j], sorted[i])) {
                 helper.incrementFixes(mid - i);
                 helper.copy(sorted, j++, result, k);
-            } else helper.copy(sorted, i++, result, k);
+            } else
+                helper.copy(sorted, i++, result, k);
+    }
+
+    public void merge(X[] a, X[] aux, int from, int mid, int to, boolean nocopy){
+        final Helper<X> helper = getHelper();
+        boolean instrumentation = helper.instrumented();
+        if(instrumentation){
+            for(int k= from; k<to; k++){
+                helper.copy(a, k, aux, k);
+            }
+        }else{
+            for(int k=from; k<to; k++){
+                aux[k] = a[k];
+            }
+        }
+        int i = from;
+        int j = mid;
+        if(instrumentation){
+            for(int k=from; k<to; k++){
+                if(i>=mid)
+                    helper.copy(aux, j++, a, k);
+                else if (j >= to)
+                    helper.copy(aux, i++, a, k);
+                else if (helper.less(aux[j], aux[i])){
+                    helper.incrementFixes(mid-1);
+                    helper.copy(aux, j++, a, k);
+                }else
+                    helper.copy(aux, i++, a, k);
+            }
+        }else{
+            for(int k=from; k< to; k++){
+                if(i >= mid)
+                    a[k] = aux[j++];
+                else if (j >= to)
+                    a[k] = aux[i++];
+                else if (less(aux[j], aux[i])){
+                    a[k] = aux[j++];
+                }else{
+                    a[k] = aux[i++];
+                }
+            }
+        }
     }
 
     public static final String MERGESORT = "mergesort";
@@ -110,4 +158,8 @@ throw new RuntimeException("implementation missing");
     }
 
     private final InsertionSort<X> insertionSort;
+
+    private static boolean less(Comparable v, Comparable w) {
+        return v.compareTo(w) < 0;
+    }
 }
